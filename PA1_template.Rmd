@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE)
 ```
 
 ### Loading and preprocessing the data
@@ -14,8 +15,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
         library(ggplot2)
         Data_Full <- read.csv("./Data/activity.csv")
+        Data_Full$date <- as.POSIXct(Data_Full$date, "%Y-%m-%d")
+        weekday <- weekdays(Data_Full$date)
+        Data_Full <- cbind(Data_Full,weekday)
         
-        str(Data_Full)
+        summary(Data_Full)
 ```
 The variables in this dataset are:  
 1. **steps:** Number of steps taking in a 5-minute interval (missing values are coded as NA)  
@@ -101,5 +105,28 @@ Which 5-minute interval, on average across all the days in the dataset, contains
 # Median of the total number of steps taken per day
         median(total_steps_complete$daily_steps)
 ```
+### Are there differences in activity patterns between weekdays and weekends?
 
+1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.  
+2. Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).   
+
+
+```{r}
+# Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+        Data_Full$date <- as.Date(strptime(Data_Full$date, format="%Y-%m-%d"))
+        Data_Full$datetype <- sapply(Data_Full$date, function(x) {
+        if (weekdays(x) == "Saturday" | weekdays(x) =="Sunday") 
+                {y <- "Weekend"} else 
+                {y <- "Weekday"}
+                y
+        })
+        head(Data_Full)
+#  Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+        activity_by_date <- aggregate(steps~interval + datetype, Data_Full, mean, na.rm = TRUE)
+        plot<- ggplot(activity_by_date, aes(x = interval , y = steps, color = datetype)) +
+        geom_line() +
+        labs(title = "Average daily steps by type of date", x = "Interval", y = "Average number of steps") +
+        facet_wrap(~datetype, ncol = 1, nrow=2)
+        print(plot)
+```
 
