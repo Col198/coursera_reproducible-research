@@ -1,0 +1,53 @@
+---
+title: "Reproducible Research - Course Project 1"
+author: "Colette van Rooyen"
+date: "02/08/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Loading and preprocessing the data
+
+```{r}
+        library(ggplot2)
+        Data_Full <- read.csv("./Data/activity.csv")
+        
+        str(Data_Full)
+```
+The variables in this dataset are:  
+1. **steps:** Number of steps taking in a 5-minute interval (missing values are coded as NA)  
+2. **date:** The date on which the measurement was taken in YYYY-MM-DD format  
+3. **interval:** Identifier for the 5-minute interval in which measurement was taken  
+
+### What is mean total number of steps taken per day?  
+
+1. Create a histogram  
+2. Calculate the total number of steps taken per day    
+3. Calculate and report the mean and median of the total number of steps taken per day  
+
+
+```{r}
+        steps_daily <- aggregate(Data_Full$steps, list(Data_Full$date), FUN = sum)
+        colnames(steps_daily) <- c( "Date", "Steps")
+        steps_daily
+        
+        # create histogram
+        g <- ggplot(steps_daily, aes(Steps))
+        g + geom_histogram(boundary=0, 
+                           binwidth=2500, 
+                           col="black", 
+                           fill="yellow")+
+                        ggtitle("Histogram of steps per day")+
+                        xlab("Steps")+ylab("Frequency")+
+                        theme(plot.title = element_text(face="bold",size=12))+
+                        scale_x_continuous(breaks=seq(0,25000,2500))+
+                        scale_y_continuous(breaks=seq(0,18,2))
+        
+        # Calculate and report the mean and median of the total number of steps taken per day
+        mean(steps_daily$Steps, na.rm = TRUE)
+        median(steps_daily$Steps, na.rm = TRUE)
+```
+
